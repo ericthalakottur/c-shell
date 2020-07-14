@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 64
 #define MEM_ALLOC_ERR -1
 
 // read the input from stdio
 char *read_command() {
-	char c, *buffer;
-	int i = 0;
+	char *buffer;
+	int c, i = 0;
 
 	// allocate size of buffer
 	buffer = malloc(sizeof(char) * BUFFER_SIZE);
@@ -42,14 +42,68 @@ char *read_command() {
 	return buffer;
 }
 
+// split the command string into individual arguments
+char **parse_command(char *command) {
+	char **argument_list;
+	int count = 0;
+	int len = 0;
+
+	// count number of words
+	for(int i = 0; i < strlen(command); i++) {
+		if((command[i] == ' ') || (command[i + 1] == '\0'))
+			count++;
+	}
+
+	argument_list = malloc(sizeof(char *) * count);
+	if(!argument_list) {
+		fprintf(stderr, "Memory not available\n");
+		free(argument_list);
+		exit(MEM_ALLOC_ERR);
+	}
+
+	// split the string at the given delimiter
+	int i = 0;
+	char *token = strtok(command, " ");
+
+	while(token != NULL) {
+		argument_list[i] = malloc(sizeof(char) * strlen(token));
+		if(!argument_list[i]) {
+			fprintf(stderr, "Memory not available\n");
+
+			// free up memory
+			for(int j = 0; j < i; j++)
+				free(argument_list[j]);
+			free(argument_list);
+
+			exit(MEM_ALLOC_ERR);
+		}
+
+		strcpy(argument_list[i], token);
+
+		token = strtok(NULL, " ");
+		i++;
+	}
+
+	for (int j = 0; j < count; ++j) {
+		printf("%s\n", argument_list[j]);
+	}
+
+	return argument_list;
+}
+
 int main() {
 	char *command;
+	char **args;
 
-	do {
+	while(1) {
 		printf("$ ");
+
 		command = read_command();
-		printf("%s\n", command);
-	}while(strcmp(command, "exit"));
+		if(!strcmp(command, "exit"))
+			break;
+
+		args = parse_command(command);
+	}
 
 	return 0;
 }
