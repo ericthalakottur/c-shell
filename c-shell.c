@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #define BUFFER_SIZE 64
-#define MEM_ALLOC_ERR -1
 
 // read the input from stdio
 char *read_command() {
@@ -14,7 +15,7 @@ char *read_command() {
 	buffer = malloc(sizeof(char) * BUFFER_SIZE);
 	if(!buffer) {
 		fprintf(stderr, "Memory not available\n");
-		exit(MEM_ALLOC_ERR);
+		exit(EXIT_FAILURE);
 	}
 
 	while(1) {
@@ -34,7 +35,7 @@ char *read_command() {
 			if(!buffer) {
 				fprintf(stderr, "Memory not available\n");
 				free(buffer);
-				exit(MEM_ALLOC_ERR);
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
@@ -58,7 +59,7 @@ char **parse_command(char *command) {
 	if(!argument_list) {
 		fprintf(stderr, "Memory not available\n");
 		free(argument_list);
-		exit(MEM_ALLOC_ERR);
+		exit(EXIT_FAILURE);
 	}
 
 	// split the string at the given delimiter
@@ -75,7 +76,7 @@ char **parse_command(char *command) {
 				free(argument_list[j]);
 			free(argument_list);
 
-			exit(MEM_ALLOC_ERR);
+			exit(EXIT_FAILURE);
 		}
 
 		strcpy(argument_list[i], token);
@@ -84,11 +85,27 @@ char **parse_command(char *command) {
 		i++;
 	}
 
-	for (int j = 0; j < count; ++j) {
-		printf("%s\n", argument_list[j]);
-	}
-
 	return argument_list;
+}
+
+// execute command
+void execute(char **args) {
+	int status;
+	pid_t pid = fork();
+
+	// check for error in creating a fork
+	if(pid == -1) {
+		fprintf(stderr, "Unable to create a child process\n");
+		return;
+	}
+	// child process
+	else if(pid == 0) {
+		execvp(args[0], args);
+	}
+	// parent process
+	else {
+		waitpid(pid, &status, WUNTRACED);
+	}
 }
 
 int main() {
@@ -103,6 +120,7 @@ int main() {
 			break;
 
 		args = parse_command(command);
+		execute(args);
 	}
 
 	return 0;
