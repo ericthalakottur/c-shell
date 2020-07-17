@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <pwd.h>
 
 #define BUFFER_SIZE 64
 
@@ -111,9 +112,27 @@ void execute(char **args) {
 int main() {
 	char *command;
 	char **args;
+	int result;
+	struct passwd *passwd_struct;
+	char username[BUFFER_SIZE], hostname[BUFFER_SIZE];
+
+	// get name of current user
+	passwd_struct = getpwuid(getuid());
+	if(!passwd_struct) {
+		fprintf(stderr, "Unavailable to retrieve username\n");
+		exit(EXIT_FAILURE);
+	}
+	strcpy(username, passwd_struct -> pw_name);
+
+	// get hostname
+	result = gethostname(hostname, BUFFER_SIZE);
+	if(result == -1) {
+		fprintf(stderr, "Unavailable to retrieve hostname\n");
+		exit(EXIT_FAILURE);
+	}
 
 	while(1) {
-		printf("$ ");
+		printf("%s@%s: $ ", username, hostname);
 
 		command = read_command();
 		if(!strcmp(command, "exit"))
