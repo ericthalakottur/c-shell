@@ -6,6 +6,8 @@
 #include <pwd.h>
 
 #define BUFFER_SIZE 64
+#define CYAN "\x1B[36m"
+#define RESET "\x1B[0m"
 
 // read the input from stdio
 char *read_command() {
@@ -69,6 +71,7 @@ char **parse_command(char *command) {
 
 	while(token != NULL) {
 		argument_list[i] = malloc(sizeof(char) * strlen(token));
+
 		if(!argument_list[i]) {
 			fprintf(stderr, "Memory not available\n");
 
@@ -132,7 +135,7 @@ int main() {
 	}
 
 	while(1) {
-		printf("%s@%s: $ ", username, hostname);
+		printf("%s%s@%s: $%s ", CYAN, username, hostname, RESET);
 
 		command = read_command();
 		if(!strcmp(command, "exit"))
