@@ -113,7 +113,7 @@ void execute(char **args) {
 }
 
 int main() {
-	char *command;
+	char *command, *cwd;
 	char **args;
 	int result;
 	struct passwd *passwd_struct;
@@ -135,7 +135,8 @@ int main() {
 	}
 
 	while(1) {
-		printf("%s%s@%s: $%s ", CYAN, username, hostname, RESET);
+		cwd = getcwd(cwd, BUFFER_SIZE);
+		printf("%s%s@%s:%s $%s ", CYAN, username, hostname, cwd, RESET);
 
 		command = read_command();
 		if(!strcmp(command, "exit"))
