@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 #include <pwd.h>
 
+#include "commands.h"
+
 #define BUFFER_SIZE 64
 #define CYAN "\x1B[36m"
 #define RESET "\x1B[0m"
@@ -104,7 +106,10 @@ void execute(char **args) {
 	}
 	// child process
 	else if(pid == 0) {
-		execvp(args[0], args);
+		if(!strcmp(args[0], "cd"))
+			cmd_cd(args[1]);
+		else
+			execvp(args[0], args);
 	}
 	// parent process
 	else {
