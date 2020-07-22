@@ -11,6 +11,8 @@
 #define CYAN "\x1B[36m"
 #define RESET "\x1B[0m"
 
+int count;
+
 // read the input from stdio
 char *read_command() {
 	char *buffer;
@@ -51,8 +53,7 @@ char *read_command() {
 // split the command string into individual arguments
 char **parse_command(char *command) {
 	char **argument_list;
-	int count = 0;
-	int len = 0;
+	count = 0;
 
 	// count number of words
 	for(int i = 0; i < strlen(command); i++) {
@@ -106,10 +107,12 @@ void execute(char **args) {
 	}
 	// child process
 	else if(pid == 0) {
-		if(!strcmp(args[0], "cd"))
+		if(!strcmp(args[0], "cd")) {
 			cmd_cd(args[1]);
-		else
+		}
+		else {
 			execvp(args[0], args);
+		}
 	}
 	// parent process
 	else {
@@ -149,6 +152,12 @@ int main() {
 
 		args = parse_command(command);
 		execute(args);
+
+		// free up memory
+		free(command);
+		for(int i = 0; i < count; i++)
+			free(args[i]);
+		free(args);
 	}
 
 	return 0;
