@@ -126,6 +126,7 @@ int main() {
 	int result;
 	struct passwd *passwd_struct;
 	char username[BUFFER_SIZE], hostname[BUFFER_SIZE];
+	FILE *hfile;
 
 	// get name of current user
 	passwd_struct = getpwuid(getuid());
@@ -142,11 +143,22 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
+	// open log file
+	hfile = fopen(".history", "a");
+	if(!hfile) {
+		fprintf(stderr, "Cannot open .history\n");
+		exit(EXIT_FAILURE);
+	}
+
 	while(1) {
 		cwd = getcwd(cwd, BUFFER_SIZE);
 		printf("%s%s@%s:%s $%s ", CYAN, username, hostname, cwd, RESET);
 
 		command = read_command();
+
+		// add entry history
+		fprintf(hfile, "%s: %s\n", username, command);
+
 		if(!strcmp(command, "exit"))
 			break;
 
@@ -159,6 +171,8 @@ int main() {
 			free(args[i]);
 		free(args);
 	}
+
+	fclose(hfile);
 
 	return 0;
 }
