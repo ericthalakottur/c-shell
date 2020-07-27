@@ -1,4 +1,4 @@
 CC=gcc
 
-c-shell: c-shell.c commands.c commands.h stack.c stack.h
-	$(CC) -o c-shell c-shell.c commands.c stack.c
+c-shell: src/c-shell.c src/commands.c src/commands.h src/stack.c src/stack.h
+	$(CC) -o c-shell src/c-shell.c src/commands.c src/stack.c
