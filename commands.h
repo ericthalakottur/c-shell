@@ -1,6 +1,6 @@
-#ifndef COMMANDS_H
+#ifndef INCLUDE_GUARD_20072020
 
-#define COMMANDS_H
+#define INCLUDE_GUARD_20072020
 
 int cmd_cd(char *);
 

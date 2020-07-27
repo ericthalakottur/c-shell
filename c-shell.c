@@ -6,6 +6,7 @@
 #include <pwd.h>
 
 #include "commands.h"
+#include "stack.h"
 
 #define BUFFER_SIZE 64
 #define CYAN "\x1B[36m"
@@ -125,6 +126,7 @@ int main() {
 	char **args;
 	int result;
 	struct passwd *passwd_struct;
+	struct stack *hstack = NULL;
 	char username[BUFFER_SIZE], hostname[BUFFER_SIZE];
 	FILE *hfile;
 
@@ -143,21 +145,30 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
-	// open log file
-	hfile = fopen(".history", "a");
+	// open file to save history
+	hfile = fopen(".history", "a+");
 	if(!hfile) {
 		fprintf(stderr, "Cannot open .history\n");
 		exit(EXIT_FAILURE);
 	}
+	// read and load the history
+	else {
+		char prev_cmd[BUFFER_SIZE];
+		while(fgets(prev_cmd, BUFFER_SIZE, hfile) != NULL) {
+			prev_cmd[strcspn(prev_cmd, "\n")] = 0;
+			hstack = push(hstack, prev_cmd);
+		}
+	}
 
 	while(1) {
-		cwd = getcwd(cwd, BUFFER_SIZE);
+		cwd = getcwd(NULL, 0);
 		printf("%s%s@%s:%s $%s ", CYAN, username, hostname, cwd, RESET);
 
 		command = read_command();
 
-		// add entry history
-		fprintf(hfile, "%s: %s\n", username, command);
+		// add entry to history
+		fprintf(hfile, "%s\n", command);
+		hstack = push(hstack, command);
 
 		if(!strcmp(command, "exit"))
 			break;
@@ -166,6 +177,7 @@ int main() {
 		execute(args);
 
 		// free up memory
+		free(cwd);
 		free(command);
 		for(int i = 0; i < count; i++)
 			free(args[i]);
