@@ -21,3 +21,14 @@ struct stack *push(struct stack *stck, char *command) {
 	}
 	return stck;
 }
+
+void free_stack(struct stack *stck) {
+	struct stack *temp;
+
+	while(stck != NULL) {
+		temp = stck;
+		stck = stck -> link;
+		free(temp -> cmd);
+		free(temp);
+	}
+}

@@ -8,5 +8,6 @@ struct stack {
 };
 
 struct stack *push(struct stack *, char *);
+void free_stack(struct stack *);
 
 #endif

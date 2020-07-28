@@ -185,6 +185,7 @@ int main() {
 	}
 
 	fclose(hfile);
+	free_stack(hstack);
 
 	return 0;
 }
